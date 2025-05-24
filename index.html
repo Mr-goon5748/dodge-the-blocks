@@ -63,6 +63,8 @@
     const gameOverSound = document.getElementById("gameOverSound");
 
     let player, block, score, gameOver;
+    let beamActive = false;
+    let rainbowHue = 0;
 
     function initGame() {
       player = {
@@ -89,8 +91,15 @@
     }
 
     const keys = {};
-    document.addEventListener("keydown", e => keys[e.key] = true);
-    document.addEventListener("keyup", e => keys[e.key] = false);
+    document.addEventListener("keydown", e => {
+      keys[e.key] = true;
+      if (e.code === "Space") beamActive = true;
+    });
+
+    document.addEventListener("keyup", e => {
+      keys[e.key] = false;
+      if (e.code === "Space") beamActive = false;
+    });
 
     function drawRect(obj) {
       ctx.fillStyle = obj.color;
@@ -108,6 +117,41 @@
       ctx.fillStyle = "#ffffff";
       ctx.font = "20px Arial";
       ctx.fillText("Score: " + score, 10, 30);
+    }
+
+    function drawBeam() {
+      if (!beamActive) return;
+
+      const beamX = player.x + player.width / 2;
+      const beamTop = 0;
+      const beamBottom = player.y;
+
+      // Glowing rainbow gradient
+      const gradient = ctx.createLinearGradient(beamX, beamTop, beamX, beamBottom);
+      gradient.addColorStop(0, `hsl(${rainbowHue}, 100%, 50%)`);
+      gradient.addColorStop(1, `hsl(${(rainbowHue + 180) % 360}, 100%, 50%)`);
+
+      ctx.save();
+      ctx.shadowColor = "white";
+      ctx.shadowBlur = 20;
+      ctx.strokeStyle = gradient;
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(beamX, beamTop);
+      ctx.lineTo(beamX, beamBottom);
+      ctx.stroke();
+      ctx.restore();
+
+      // Beam hits block
+      if (beamX >= block.x && beamX <= block.x + block.width &&
+          player.y >= block.y && beamTop <= block.y + block.height) {
+        block.y = 0;
+        block.x = Math.random() * (canvas.width - block.width);
+        score++;
+        scoreSound.play();
+      }
+
+      rainbowHue = (rainbowHue + 5) % 360;
     }
 
     function update() {
@@ -134,6 +178,7 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawRect(player);
       drawRect(block);
+      drawBeam();
       drawScore();
     }
 
