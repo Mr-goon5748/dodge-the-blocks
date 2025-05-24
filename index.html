@@ -11,10 +11,24 @@
       margin: 0 auto;
       border: 2px solid #000;
     }
+    #restartButton {
+      display: none;
+      margin: 20px auto;
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      text-align: center;
+      display: block;
+    }
   </style>
 </head>
 <body>
   <canvas id="gameCanvas" width="400" height="600"></canvas>
+  <button id="restartButton">Restart Game</button>
 
   <audio id="scoreSound" src="https://actions.google.com/sounds/v1/cartoon/pop.ogg"></audio>
   <audio id="gameOverSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
@@ -22,30 +36,36 @@
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
+    const restartButton = document.getElementById("restartButton");
 
     const scoreSound = document.getElementById("scoreSound");
     const gameOverSound = document.getElementById("gameOverSound");
 
-    const player = {
-      x: 175,
-      y: 550,
-      width: 50,
-      height: 50,
-      color: "blue",
-      speed: 7
-    };
+    let player, block, score, gameOver;
 
-    const block = {
-      x: Math.random() * 350,
-      y: 0,
-      width: 50,
-      height: 50,
-      color: "red",
-      speed: 5
-    };
+    function initGame() {
+      player = {
+        x: 175,
+        y: 550,
+        width: 50,
+        height: 50,
+        color: "blue",
+        speed: 7
+      };
 
-    let score = 0;
-    let gameOver = false;
+      block = {
+        x: Math.random() * 350,
+        y: 0,
+        width: 50,
+        height: 50,
+        color: "red",
+        speed: 5
+      };
+
+      score = 0;
+      gameOver = false;
+      restartButton.style.display = "none";
+    }
 
     const keys = {};
     document.addEventListener("keydown", e => keys[e.key] = true);
@@ -85,6 +105,7 @@
       if (detectCollision(player, block)) {
         gameOver = true;
         gameOverSound.play();
+        restartButton.style.display = "block";
       }
     }
 
@@ -109,7 +130,14 @@
       }
     }
 
+    restartButton.addEventListener("click", () => {
+      initGame();
+      loop();
+    });
+
+    initGame();
     loop();
   </script>
 </body>
 </html>
+updated with restart button
